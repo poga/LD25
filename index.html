@@ -1,0 +1,35 @@
+<!DOCTYPE html> 
+<html>
+  <head>
+    <script src="jaws.js"></script>
+    <script src="play.js"></script>
+    <title>Villian in love</title>
+    <style>
+      body {
+        background-color: gray;
+      }
+
+      canvas {
+        background-color: white;
+      }
+    </style>
+  </head>
+<body>
+  <div id="info">
+    You're the villain
+  </div>
+
+  <canvas width="500px" height="500px">
+  </canvas>
+
+  <script>
+    jaws.onload = function() {
+      jaws.assets.add("boy_ani.png");
+      jaws.assets.add("background_ani.png");
+      jaws.start(playState);  // Our convenience function jaws.start() will load assets, call setup and loop update/draw in 60 FPS
+    }
+  </script>
+
+</body>
+</html>
+
