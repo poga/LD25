@@ -9,6 +9,7 @@ var playState = {
     MAX_HEIGHT: 500,
     VERTICAL_SPEED: 3,
     context_saved: false,
+    tick: 0,
 
     setup: function () {
         "use strict";
@@ -52,7 +53,7 @@ var playState = {
                 jaws.context.save();
                 this.context_saved = true;
             }
-            jaws.context.translate(Math.random() * 4 - 2, Math.random() * 4 - 2);
+            jaws.context.translate(Math.random() * 6 - 3, Math.random() * 6 - 3);
             this.player.boosting = true;
         } else {
             if (this.context_saved) {
@@ -65,6 +66,13 @@ var playState = {
         this._updatePlayer();
         this._updateBackground();
         this._updateBlocks();
+
+        if (this.tick > 50) {
+            this._addBlockRow();
+            this.tick = 0;
+        } else {
+            this.tick += 1;
+        }
     },
 
     draw: function () {
@@ -126,7 +134,11 @@ var playState = {
         var left = 0;
 
         while (left < this.MAX_WIDTH) {
-            var block = new jaws.Sprite({image: "good_block.png", x: left, y: -100, anchor: "top_left"});
+            if (Math.random() * 2 > 1) {
+                var block = new jaws.Sprite({image: "good_block.png", x: left, y: -100, anchor: "top_left"});
+            } else {
+                var block = new jaws.Sprite({image: "bad_block.png", x: left, y: -100, anchor: "top_left"});
+            }
             block.collided = false;
             this.blocks.push(block);
             left += 100;
