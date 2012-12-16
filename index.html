@@ -56,7 +56,7 @@
       if (playsMP3()) {
         jaws.assets.add("bgm.mp3");
       }
-      jaws.start(goodEndingState);
+      jaws.start(introState);
     }
 
     function playsOGG() { var audio = new Audio(); return !!audio.canPlayType && audio.canPlayType( 'audio/ogg; codecs="vorbis"' ) }
