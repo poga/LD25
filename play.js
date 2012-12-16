@@ -96,7 +96,6 @@ var playState = {
 
         if (this.translate) {
             jaws.context.save();
-            jaws.context.translate(Math.random() * 6 - 3, Math.random() * 6 - 3);
         }
     },
 
