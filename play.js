@@ -86,7 +86,7 @@ var playState = {
         this._updateBlocks();
         this._updateTimer();
 
-        if (this.tick > 20) {
+        if (this.tick > 22) {
             this._addBlockRow();
             this.tick = 0;
         } else {
@@ -389,14 +389,14 @@ var playState = {
     ], [
         // 10 dual-mix-dual
         [0, 1, 0, 1, 0],
-        [0, 1, 0, 1, 0],
+        [1, 0, 0, 0, 1],
         [0, 1, 0, 1, 0],
         [0, 0, 1, 0, 0],
         [0, 0, 1, 0, 0],
         [0, 0, 1, 0, 0],
         [0, 0, 1, 0, 0],
         [0, 1, 0, 1, 0],
-        [0, 1, 0, 1, 0],
+        [1, 0, 0, 0, 1],
         [0, 1, 0, 1, 0]
     ], [
         // 11 noise

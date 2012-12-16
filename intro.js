@@ -23,6 +23,10 @@ var introState = {
             self.playMovie = true;
         });
 
+        jaws.on_keydown(["x"], function () {
+            jaws.switchGameState(playState);
+        });
+
         this.backgrounds = new jaws.SpriteList();
         while (y_offset < this.MAX_HEIGHT) {
             while (x_offset < this.MAX_WIDTH) {
@@ -52,7 +56,8 @@ var introState = {
             jaws.context.lineWidth = 10;
             jaws.context.fillStyle =  "white";
             jaws.context.strokeStyle =  "rgba(200,200,200,0.0)";
-            jaws.context.fillText("Press z to start", 125, 100);
+            jaws.context.fillText("Press z to see intro", 125, 100);
+            jaws.context.fillText("Press x to start", 125, 150);
             jaws.context.font = "bold 10pt terminal";
             jaws.context.fillText("Why... I really love you...", 280, 420);
             jaws.context.fillText("you just broke my heart...", 280, 440);
