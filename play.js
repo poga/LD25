@@ -86,16 +86,15 @@ var playState = {
 
         // Restore the context
         jaws.context.restore();
-        // If the translation is stopped, set the flag of context stack to false
-        if (!this.translate) {
-            this.context_saved = false;
-        }
 
         // These sprites won't be translated
         this.player.draw();
 
         if (this.translate) {
             jaws.context.save();
+        } else {
+            // If the translation is stopped, set the flag of context stack to false
+            this.context_saved = false;
         }
     },
 
