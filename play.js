@@ -17,14 +17,15 @@ var playState = {
         var anim = new jaws.Animation({sprite_sheet: "boy_ani.png", frame_size: [32, 64], frame_duration: 200}),
             bgAnim = new jaws.Animation({sprite_sheet: "background_ani.png", frame_size: [240, 240], frame_duration: 1000}),
             x_offset = 0,
-            y_offset = 0;
+            y_offset = 0,
+            bg;
 
         this.backgrounds = new jaws.SpriteList();
         this.blocks = new jaws.SpriteList();
 
         while (y_offset < this.MAX_HEIGHT) {
             while (x_offset < this.MAX_WIDTH) {
-                var bg = new jaws.Sprite({image: "background.png", x: x_offset, y: y_offset, anchor: "top_left"});
+                bg = new jaws.Sprite({image: "background.png", x: x_offset, y: y_offset, anchor: "top_left"});
                 bg.anim_default = bgAnim.slice(0, 2);
                 bg.setImage(bg.anim_default.next());
                 this.backgrounds.push(bg);
@@ -40,8 +41,6 @@ var playState = {
         this.player.boosting = false;
 
         jaws.preventDefaultKeys(["up", "down", "left", "right"]);
-
-        this._addBlockRow();
     },
 
     update: function () {
@@ -99,6 +98,7 @@ var playState = {
     },
 
     _updatePlayer: function () {
+        "use strict";
         this.player.setImage(this.player.anim_default.next());
 
         if (this.player.boosting) {
@@ -112,7 +112,7 @@ var playState = {
 
     _updateBackground: function () {
         "use strict";
-        var self = this;
+        var self = this, top, x_offset, bg, bgAnim;
 
         this.bgOffsetY += this.VERTICAL_SPEED;
         this.backgrounds.forEach(function (bg, index) {
@@ -121,11 +121,11 @@ var playState = {
         });
 
         if (this.bgOffsetY > 0) {
-            var top = this.bgOffsetY - 240,
-                x_offset = 0;
+            top = this.bgOffsetY - 240;
+            x_offset = 0;
             while (x_offset < this.MAX_WIDTH) {
-                var bg = new jaws.Sprite({image: "background.png", x: x_offset, y: 0, anchor: "top_left"}),
-                    bgAnim = new jaws.Animation({sprite_sheet: "background_ani.png", frame_size: [240, 240], frame_duration: 1000});
+                bg = new jaws.Sprite({image: "background.png", x: x_offset, y: 0, anchor: "top_left"});
+                bgAnim = new jaws.Animation({sprite_sheet: "background_ani.png", frame_size: [240, 240], frame_duration: 1000});
                 bg.moveTo(bg.x, top);
                 bg.anim_default = bgAnim.slice(0, 2);
                 bg.setImage(bg.anim_default.next());
@@ -146,13 +146,13 @@ var playState = {
     _addBlockRow: function () {
         "use strict";
 
-        var left = 0;
+        var left = 0, block;
 
         while (left < this.MAX_WIDTH) {
             if (Math.random() * 2 > 1) {
-                var block = new jaws.Sprite({image: "good_block.png", x: left, y: -100, anchor: "top_left"});
+                block = new jaws.Sprite({image: "good_block.png", x: left, y: -100, anchor: "top_left"});
             } else {
-                var block = new jaws.Sprite({image: "bad_block.png", x: left, y: -100, anchor: "top_left"});
+                block = new jaws.Sprite({image: "bad_block.png", x: left, y: -100, anchor: "top_left"});
             }
             block.collided = false;
             this.blocks.push(block);
@@ -176,14 +176,12 @@ var playState = {
             }
         });
 
-
         this.blocks.removeIf(function (block) {
             if (block.y > self.MAX_HEIGHT) {
                 return true;
             }
             return false;
         });
-
     }
 }
 
