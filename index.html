@@ -2,8 +2,9 @@
 <html>
   <head>
     <script src="jaws.js"></script>
+    <script src="intro.js"></script>
     <script src="play.js"></script>
-    <title>Villian in love</title>
+    <title>I will always love you... do I?</title>
     <style>
       body {
         background-color: gray;
@@ -16,19 +17,29 @@
   </head>
 <body>
   <div id="info">
-    A Love Story(Who's the villain?)
+    <h1>I will always love you... do I?</h1>
+
+    There are 3 endings.<br />
+
+    click the game to set focus.
   </div>
 
   <canvas width="500px" height="500px">
   </canvas>
 
+  <div id="quotes">
+    <h2>Things you remember</h2>
+  </div>
+
   <script>
     jaws.onload = function() {
       jaws.assets.add("boy_ani.png");
+      jaws.assets.add("boy.png");
+      jaws.assets.add("girl.png");
       jaws.assets.add("background_ani.png");
       jaws.assets.add("good_block.png");
       jaws.assets.add("bad_block.png");
-      jaws.start(playState);  // Our convenience function jaws.start() will load assets, call setup and loop update/draw in 60 FPS
+      jaws.start(introState);  // Our convenience function jaws.start() will load assets, call setup and loop update/draw in 60 FPS
     }
   </script>
 
