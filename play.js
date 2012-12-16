@@ -10,6 +10,7 @@ var playState = {
     VERTICAL_SPEED: 3,
     context_saved: false,
     tick: 0,
+    translate: false,
 
     setup: function () {
         "use strict";
@@ -49,17 +50,10 @@ var playState = {
         if (jaws.pressed("left")) { this.player.x -= 4; }
         if (jaws.pressed("right")) { this.player.x += 4; }
         if (jaws.pressed("z")) {
-            if (!this.context_saved) {
-                jaws.context.save();
-                this.context_saved = true;
-            }
-            jaws.context.translate(Math.random() * 6 - 3, Math.random() * 6 - 3);
+            this.translate = true;
             this.player.boosting = true;
         } else {
-            if (this.context_saved) {
-                jaws.context.restore();
-                this.context_saved = false;
-            }
+            this.translate = false;
             this.player.boosting = false;
         }
 
@@ -78,9 +72,32 @@ var playState = {
     draw: function () {
         "use strict";
         jaws.clear();
+        if (this.translate) {
+            if (!this.context_saved) {
+                jaws.context.save();
+                this.context_saved = true;
+            }
+            jaws.context.translate(Math.random() * 6 - 3, Math.random() * 6 - 3);
+        }
+
+        // These sprites will be translated
         this.backgrounds.draw();
         this.blocks.draw();
+
+        // Restore the context
+        jaws.context.restore();
+        // If the translation is stopped, set the flag of context stack to false
+        if (!this.translate) {
+            this.context_saved = false;
+        }
+
+        // These sprites won't be translated
         this.player.draw();
+
+        if (this.translate) {
+            jaws.context.save();
+            jaws.context.translate(Math.random() * 6 - 3, Math.random() * 6 - 3);
+        }
     },
 
     _updatePlayer: function () {
