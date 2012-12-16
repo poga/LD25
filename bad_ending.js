@@ -1,13 +1,10 @@
 /*jslint nomen: true*/
 /*global jaws, console, playState*/
-var introState = {
+var badEndingState = {
     MAX_WIDTH: 500,
     MAX_HEIGHT: 500,
     backgrounds: null,
     boy: null,
-    girl: null,
-    playMovie: false,
-    playMovie2: 0,
 
     setup: function () {
         "use strict";
@@ -19,9 +16,11 @@ var introState = {
             y_offset = 0,
             bg;
         
-        jaws.on_keydown(["z"], function () {
-            self.playMovie = true;
+        /*
+        jaws.on_keydown(["x"], function () {
+            jaws.switchGameState(playState);
         });
+        */
 
         this.backgrounds = new jaws.SpriteList();
         while (y_offset < this.MAX_HEIGHT) {
@@ -37,7 +36,9 @@ var introState = {
         }
         
         this.boy = new jaws.Sprite({image: "boy.png", x: 230, y: 450, anchor: "top_left"});
-        this.girl = new jaws.Sprite({image: "girl.png", x: 350, y: 450, anchor: "top_left"});
+        this.boy = new jaws.Sprite({x: jaws.width / 2, y: jaws.height - 50, anchor: "center"});
+        this.boy.anim_default = anim.slice(0, 2);
+        this.boy.setImage(this.boy.anim_default.next());
     },
 
     draw: function () {
@@ -45,23 +46,13 @@ var introState = {
 
         this.backgrounds.draw();
         this.boy.draw();
-        this.girl.draw();
 
-        if (!this.playMovie) {
-            jaws.context.font = "bold 20pt terminal";
-            jaws.context.lineWidth = 10;
-            jaws.context.fillStyle =  "white";
-            jaws.context.strokeStyle =  "rgba(200,200,200,0.0)";
-            jaws.context.fillText("Press z to start", 125, 100);
-            jaws.context.font = "bold 10pt terminal";
-            jaws.context.fillText("Why... I really love you...", 280, 420);
-            jaws.context.fillText("you just broke my heart...", 280, 440);
-        }
-
-        if (this.playMovie2 >= 1) {
-            jaws.context.fillText("What have I done?", 200, 440);
-            
-        }
+        jaws.context.font = "bold 20pt terminal";
+        jaws.context.lineWidth = 10;
+        jaws.context.fillStyle =  "white";
+        jaws.context.strokeStyle =  "rgba(200,200,200,0.0)";
+        jaws.context.fillText("Maybe we're both villains?", 75, 80);
+        //jaws.context.fillText("Press x to try again", 115, 130);
     },
 
     update: function () {
@@ -69,22 +60,9 @@ var introState = {
         this.backgrounds.forEach(function (bg, index) {
             bg.setImage(bg.anim_default.next());
         });
-
-        if (this.playMovie) {
-            this.girl.move(0, -2);
-
-            if (this.girl.y <= 0 && this.playMovie2 === 0) {
-                this.playMovie2 = 1;
-            }
-        }
-
-        if (this.playMovie2 >= 1) {
-            this.playMovie2 += 1;
-
-            if (this.playMovie2 >= 180) {
-                jaws.switchGameState(playState);
-            }
-        }
-
+        this.boy.setImage(this.boy.anim_default.next());
     }
 };
+
+
+

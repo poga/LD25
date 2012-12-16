@@ -4,6 +4,9 @@
     <script src="jaws.js"></script>
     <script src="intro.js"></script>
     <script src="play.js"></script>
+    <script src="game_over.js"></script>
+    <script src="good_ending.js"></script>
+    <script src="bad_ending.js"></script>
     <title>I will always love you... do I?</title>
     <style>
       body {
@@ -13,6 +16,18 @@
       canvas {
         background-color: white;
       }
+
+      #info {
+        margin-bottom: 20px;
+      }
+
+      .good {
+        color: green;
+      }
+
+      .bad {
+        color: red;
+      }
     </style>
   </head>
 <body>
@@ -21,26 +36,31 @@
 
     There are 3 endings.<br />
 
-    click the game to set focus.
+    click the game to set focus. Press z to release your rage.
   </div>
 
   <canvas width="500px" height="500px">
   </canvas>
 
-  <div id="quotes">
-    <h2>Things you remember</h2>
-  </div>
-
   <script>
     jaws.onload = function() {
+      jaws.assets.add("boost.wav");
+
       jaws.assets.add("boy_ani.png");
       jaws.assets.add("boy.png");
       jaws.assets.add("girl.png");
       jaws.assets.add("background_ani.png");
       jaws.assets.add("good_block.png");
       jaws.assets.add("bad_block.png");
-      jaws.start(introState);  // Our convenience function jaws.start() will load assets, call setup and loop update/draw in 60 FPS
+
+      if (playsMP3()) {
+        jaws.assets.add("bgm.mp3");
+      }
+      jaws.start(goodEndingState);
     }
+
+    function playsOGG() { var audio = new Audio(); return !!audio.canPlayType && audio.canPlayType( 'audio/ogg; codecs="vorbis"' ) }
+    function playsMP3() { var audio = new Audio(); return !!audio.canPlayType && audio.canPlayType( 'audio/mpeg;' ) }
   </script>
 
 </body>

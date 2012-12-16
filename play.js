@@ -1,5 +1,5 @@
 /*jslint nomen: true*/
-/*global jaws, console*/
+/*global jaws, console, gameOverState, goodEndingState, badEndingState*/
 var playState = {
     player: null,
     backgrounds: null,
@@ -7,30 +7,17 @@ var playState = {
     bgOffsetY: 0,
     MAX_WIDTH: 500,
     MAX_HEIGHT: 500,
-    VERTICAL_SPEED: 5,
+    VERTICAL_SPEED: 9,
     context_saved: false,
     tick: -300,
     translate: false,
-    // Patterns!
-    patterns: [[[1, 1, 1, 1, 1],
-                [0, 1, 1, 1, 0],
-                [0, 0, 1, 0, 0],
-                [0, 0, 1, 0, 0],
-                [1, 1, 1, 1, 1],
-                [0, 1, 1, 1, 0]],
-               [[1, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0],
-                [0, 0, 1, 0, 0],
-                [0, 0, 0, 1, 0],
-                [0, 0, 0, 0, 1]]],
     patternIndex: 0,
     patternSubIndex: 0,
-    goodQuotes: [ "I love you.", "Forever.", "Our first kiss.", "First date."],
-    badQuotes: [ "Forgot something important.", "Lying.", "Ignoring" ],
     // Player Status
     hp: 50,
     time: 75,
     rage: 0,
+    background_audio: null,
 
     dt: 0,
 
@@ -41,6 +28,10 @@ var playState = {
             x_offset = 0,
             y_offset = 0,
             bg;
+
+        //BGM
+        this.background_audio = jaws.assets.get("bgm.mp3");
+        this.background_audio.play();
 
         this.backgrounds = new jaws.SpriteList();
         this.blocks = new jaws.SpriteList();
@@ -68,12 +59,23 @@ var playState = {
     update: function () {
         "use strict";
         // Keyboard Handling
-        if (jaws.pressed("left")) { this.player.x -= 12; }
-        if (jaws.pressed("right")) { this.player.x += 12; }
+        if (jaws.pressed("left")) {
+            this.player.x -= 12;
+            if (this.player.x < 0) { this.player.x = 0; }
+        }
+        if (jaws.pressed("right")) {
+            this.player.x += 12;
+            if (this.player.x > 500) { this.player.x = 500; }
+        }
         if (jaws.pressed("z")) {
-            this.translate = true;
-            this.rage -= 1;
-            this.player.boosting = true;
+            if (this.rage > 0) {
+                this.translate = true;
+                this.rage -= 1;
+                this.player.boosting = true;
+            } else {
+                this.translate = false;
+                this.player.boosting = false;
+            }
         } else {
             this.translate = false;
             this.player.boosting = false;
@@ -84,7 +86,7 @@ var playState = {
         this._updateBlocks();
         this._updateTimer();
 
-        if (this.tick > 30) {
+        if (this.tick > 20) {
             this._addBlockRow();
             this.tick = 0;
         } else {
@@ -129,9 +131,13 @@ var playState = {
 
         context.fillStyle = "white";
         context.font = "bold 20px Arial";
-        context.fillText("HP: " + this.hp, 10, 20);
-        context.fillText("RAGE: " + this.rage, 10, 45);
+        context.fillText("LOVE: " + this.hp + "/100", 10, 20);
+        context.fillText("RAGE: " + this.rage + "/100", 10, 45);
         context.fillText("TIME: " + this.time, 10, 70);
+
+        if (this.tick < -100) {
+            jaws.context.fillText("Find your (happy/sad) memories back", 85, 250);
+        }
     },
 
     _updateTimer: function () {
@@ -144,6 +150,10 @@ var playState = {
         if (this.dt >= 1000) {
             this.time -= 1;
             this.dt = 0;
+        }
+
+        if (this.time <= 0) {
+            this.ending();
         }
     },
 
@@ -249,18 +259,29 @@ var playState = {
         this.blocks.forEach(function (block, i) {
             block.move(0, self.VERTICAL_SPEED + 2);
             if (!block.collided) {
-                if (block.y + 100 >= self.player.y) {
+                if (block.y + 100 >= self.player.y && block.y + 100 < self.player.y + 64) {
                     if (block.x <= self.player.x && block.x + 100 >= self.player.x) {
                         console.log("collide!");
                         block.collided = true;
-                        block.shouldRemove = true;
 
-                        if (!self.player.boosting) {
+                        if (self.player.boosting) {
+                            block.alpha = 0.5;
+                        } else {
+                            block.shouldRemove = true;
                             if (block.type === "good") {
-                                self.hp += 5;
+                                if (self.hp < 100) {
+                                    self.hp += 1;
+                                }
                             } else {
-                                self.hp -= 5;
+                                self.hp -= 10;
+                                if (self.hp < 0) {
+                                    self.hp = 0;
+                                }
                                 self.rage += 10;
+
+                                if (self.hp <= 0 || self.rage >= 100) {
+                                    self.gameOver();
+                                }
                             }
                         }
                     }
@@ -274,6 +295,195 @@ var playState = {
             }
             return false;
         });
-    }
+    },
+
+    ending: function () {
+        "use strict";
+        if (this.rage < 10 && this.hp > 50) {
+            jaws.switchGameState(goodEndingState);
+        } else {
+            jaws.switchGameState(badEndingState);
+        }
+    },
+
+    gameOver: function () {
+        "use strict";
+        this.background_audio.pause();
+        this.background_audio.currentTime = 0;
+        jaws.switchGameState(gameOverState);
+    },
+
+    // Patterns!
+    patterns: [[
+        // 10 hourglass
+        [1, 1, 1, 1, 1],
+        [0, 1, 1, 1, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0],
+        [0, 1, 0, 1, 0],
+        [1, 0, 0, 0, 1]
+    ], [
+        // 10 lwave
+        [1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 1],
+        [0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0],
+        [1, 0, 0, 0, 0]
+    ], [
+        // 10 l+wave
+        [1, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 1, 0],
+        [1, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 1, 0],
+        [1, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0]
+    ], [
+        // 10 llong mini wave
+        [0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 0]
+    ], [
+        // 10 rstraight
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 1],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0]
+    ], [
+        // 10 mini wave
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0]
+    ], [
+        // 10 dual-mix-dual
+        [0, 1, 0, 1, 0],
+        [0, 1, 0, 1, 0],
+        [0, 1, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0],
+        [0, 1, 0, 1, 0],
+        [0, 1, 0, 1, 0]
+    ], [
+        // 11 noise
+        [1, 0, 1, 0, 1],
+        [0, 0, 1, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 1],
+        [0, 1, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 1, 1, 0],
+        [1, 0, 1, 0, 1]
+    ], [
+        // 10 diamond
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0],
+        [1, 0, 0, 0, 1],
+        [0, 1, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0],
+        [1, 0, 0, 0, 1],
+        [0, 1, 0, 1, 0],
+        [0, 0, 1, 0, 0]
+    ], [
+        // 10 wave + l
+        [0, 0, 1, 0, 1],
+        [0, 1, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [0, 1, 0, 0, 1],
+        [0, 0, 1, 0, 1],
+        [0, 1, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [0, 1, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [0, 1, 0, 0, 1]
+    ], [
+        // 10 rlong mini wave
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0]
+    ], [
+        // 10 sparse hourglass
+        [1, 0, 0, 0, 1],
+        [0, 1, 0, 1, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 1, 0, 1, 0],
+        [1, 0, 0, 0, 1]
+    ], [
+        // 10 shock
+        [0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 1],
+        [0, 0, 1, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 1, 0, 0],
+        [1, 0, 0, 0, 0],
+        [0, 1, 1, 0, 0],
+        [0, 0, 1, 1, 0],
+        [0, 0, 0, 1, 1]
+    ], [
+        // 10 rwave
+        [0, 0, 0, 0, 1],
+        [0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 1]
+    ]]
+
 };
 
