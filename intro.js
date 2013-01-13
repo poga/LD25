@@ -30,7 +30,7 @@ var introState = {
         this.backgrounds = new jaws.SpriteList();
         while (y_offset < this.MAX_HEIGHT) {
             while (x_offset < this.MAX_WIDTH) {
-                bg = new jaws.Sprite({image: "background.png", x: x_offset, y: y_offset, anchor: "top_left"});
+                bg = new jaws.Sprite({x: x_offset, y: y_offset, anchor: "top_left"});
                 bg.anim_default = bgAnim.slice(0, 2);
                 bg.setImage(bg.anim_default.next());
                 this.backgrounds.push(bg);

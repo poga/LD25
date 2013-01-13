@@ -21,6 +21,27 @@ var playState = {
 
     dt: 0,
 
+    init: function () {
+        "use strict";
+
+        this.player = null;
+        this.backgrounds = null;
+        this.blocks = null;
+        this.bgOffsetY = 0;
+        this.context_saved = false;
+        this.tick = -300;
+        this.translate = false;
+        this.patternIndex = 0;
+        this.patternSubIndex = 0;
+        this.hp = 50;
+        this.time = 75;
+        this.rage = 0;
+        this.background_audio = null;
+        this.dt = 0;
+
+        this.setup();
+    },
+
     setup: function () {
         "use strict";
         var anim = new jaws.Animation({sprite_sheet: "boy_ani.png", frame_size: [32, 64], frame_duration: 200}),
@@ -30,15 +51,20 @@ var playState = {
             bg;
 
         //BGM
-        this.background_audio = jaws.assets.get("bgm.mp3");
-        this.background_audio.play();
+        if (playsMP3()) {
+            this.background_audio = jaws.assets.get("bgm.mp3");
+            this.background_audio.play();
+        } else {
+            this.background_audio = jaws.assets.get("bgm.ogg");
+            this.background_audio.play();
+        }
 
         this.backgrounds = new jaws.SpriteList();
         this.blocks = new jaws.SpriteList();
 
         while (y_offset < this.MAX_HEIGHT) {
             while (x_offset < this.MAX_WIDTH) {
-                bg = new jaws.Sprite({image: "background.png", x: x_offset, y: y_offset, anchor: "top_left"});
+                bg = new jaws.Sprite({x: x_offset, y: y_offset, anchor: "top_left"});
                 bg.anim_default = bgAnim.slice(0, 2);
                 bg.setImage(bg.anim_default.next());
                 this.backgrounds.push(bg);

@@ -16,16 +16,15 @@ var gameOverState = {
             y_offset = 0,
             bg;
         
-        /*
         jaws.on_keydown(["x"], function () {
             jaws.switchGameState(playState);
+            playState.init();
         });
-        */
 
         this.backgrounds = new jaws.SpriteList();
         while (y_offset < this.MAX_HEIGHT) {
             while (x_offset < this.MAX_WIDTH) {
-                bg = new jaws.Sprite({image: "background.png", x: x_offset, y: y_offset, anchor: "top_left"});
+                bg = new jaws.Sprite({x: x_offset, y: y_offset, anchor: "top_left"});
                 bg.anim_default = bgAnim.slice(0, 2);
                 bg.setImage(bg.anim_default.next());
                 this.backgrounds.push(bg);
@@ -43,6 +42,7 @@ var gameOverState = {
 
     draw: function () {
         "use strict";
+        jaws.clear();
 
         this.backgrounds.draw();
         this.boy.draw();
@@ -52,7 +52,7 @@ var gameOverState = {
         jaws.context.fillStyle =  "white";
         jaws.context.strokeStyle =  "rgba(200,200,200,0.0)";
         jaws.context.fillText("You lost all your love", 115, 50);
-        //jaws.context.fillText("Press x to try again", 125, 100);
+        jaws.context.fillText("Press x to try again", 125, 100);
         jaws.context.font = "bold 10pt terminal";
         jaws.context.fillText("I'm good, she's the villain", 150, 400);
     },

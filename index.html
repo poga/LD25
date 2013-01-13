@@ -55,6 +55,8 @@
 
       if (playsMP3()) {
         jaws.assets.add("bgm.mp3");
+      } else{
+        jaws.assets.add("bgm.ogg");
       }
       jaws.start(introState);
     }
